@@ -4,6 +4,8 @@ import android.util.Log;
 
 import java.io.File;
 import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -39,6 +41,8 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
 
     private int intervalos = 0;
 
+    private Writer recordRDF;
+
     long tTotalRepresentation;
 
     public HWSensorBloodPressure(File registroAtual, String tempo[]) {
@@ -60,11 +64,13 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
         this.tempoTotalMedida = Integer.parseInt(tempo[0]);
         this.intervalos = Integer.parseInt(tempo[1]);
 
+        this.recordRDF = new StringWriter();
+
         ReaderCSV reader = new ReaderCSV(this.registroMimic);
 
         // int totalLinhas = reader.getLinhas().size();
-        List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4,
-                tempoTotalMedida);
+        List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4, tempoTotalMedida);
+
         Log.i("HERMES WIDGET", listaComSinaisVitais.get(0)[0]);
 
         int totalThreads = (listaComSinaisVitais.size()) / this.intervalos;
@@ -101,7 +107,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                     + nomeRegistro
                     + " started! Date: "
                     + new Date().toString();
-            HWLog.recordLog(log);
+//            HWLog.recordLog(log);
 
             Log.i("HERMES WIDGET", log + "\n");
 
@@ -191,11 +197,17 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                 // "TURTLE");
                 //
 
+                representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
+
                 representationService.setModeloMedicaoSinalVital(null);
 
                 contadorThreads++;
             }
             contadorLinhas++;
         }
+    }
+
+    public Writer getRecordRDF() {
+        return this.recordRDF;
     }
 }

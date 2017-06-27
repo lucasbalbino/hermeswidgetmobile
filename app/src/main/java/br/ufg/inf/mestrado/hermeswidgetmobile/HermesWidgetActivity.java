@@ -12,40 +12,42 @@ import java.io.InputStream;
 import java.util.Date;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
-import java.util.concurrent.TimeUnit;
 
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.bloodPressure.HWSensorBloodPressure;
 
-public class DisplayMessageActivity extends AppCompatActivity {
+public class HermesWidgetActivity extends AppCompatActivity {
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_display_message);
+        setContentView(R.layout.activity_hermes_widget);
 
-        // Get the Intent that started this activity and extract the string
         Intent intent = getIntent();
-        String message = intent.getStringExtra(MainActivity.EXTRA_MESSAGE);
 
-        // Capture the layout's TextView and set the string as its text
+        String args[] = new String[2];
+        args[0] = "5";
+        args[1] = "1";
+
+        String arquivo = "041n.csv";
+
         TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setText(message);
+        textView.setText(sensorBloodPressureRecord(args, arquivo));
+    }
+
+    private String sensorBloodPressureRecord(String args[], String arquivo) {
+        String record = "";
 
         AssetManager assetManager = getAssets();
         InputStream registroMimic = null;
         String nome = "";
         try {
-            registroMimic = assetManager.open("mimic/paciente-teste/041n.csv");
+            registroMimic = assetManager.open("mimic/paciente-teste/" + arquivo);
             nome = "041n.csv";
         } catch (IOException e) {
             Log.e("message: ", e.getMessage());
         }
 
         Log.i("HERMES WIDGET", "Hermes Widget Sensor " + nome + " inicializado as " + new Date());
-
-        String args[] = new String[2];
-        args[0] = "1";
-        args[1] = "1";
 
 
         ScheduledExecutorService poolWidgets = Executors.newScheduledThreadPool(Integer.parseInt(args[1]));
@@ -54,5 +56,8 @@ public class DisplayMessageActivity extends AppCompatActivity {
 
 //        poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
 
+        record = widget.getRecordRDF().toString();
+
+        return record;
     }
 }

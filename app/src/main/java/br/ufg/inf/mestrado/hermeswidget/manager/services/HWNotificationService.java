@@ -47,7 +47,7 @@ public class HWNotificationService implements Runnable {
                     + hermesWidgetTO.getIdEntidade() + ", broadcast on topic: "
                     + hermesWidgetTO.getNomeTopico() + "H" + ", at: " + new Date();
 
-            HWLog.recordLog(log);
+//            HWLog.recordLog(log);
 
             System.out.println("\n" + log);
 
