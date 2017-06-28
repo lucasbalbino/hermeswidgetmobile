@@ -28,7 +28,7 @@ public class App_HW_BloodPressure {
 
 		for (File registroAtual : diretorioMimic.listFiles())
 		{
-			System.out.println("Hermes Widget Sensor: "+ registroAtual.getName() +" inicializado as "+ new Date());
+			//System.out.println("Hermes Widget Sensor: "+ registroAtual.getName() +" inicializado as "+ new Date());
 			
 			HWSensorBloodPressure widget = new HWSensorBloodPressure(registroAtual, args);
 			

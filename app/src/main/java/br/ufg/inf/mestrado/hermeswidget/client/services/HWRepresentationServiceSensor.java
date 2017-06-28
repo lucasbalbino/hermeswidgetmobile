@@ -17,7 +17,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 import com.hp.hpl.jena.rdf.model.ModelFactory;
 import com.hp.hpl.jena.rdf.model.Resource;
 import com.hp.hpl.jena.vocabulary.RDF;
-
+import android.util.Log;
 public class HWRepresentationServiceSensor extends HWRepresentationService {
 
     private HWTransferObject hermesWidgetTO = null;
@@ -65,8 +65,8 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         modeloMedicaoSinalVital = representObservation(abreveaturaSinalVital, "property-" + abreveaturaSinalVital, "sensor-" + nomeClasseSinalVital, sensorOutput, "observation-" + abreveaturaSinalVital, observationValue, values, unidadeMedida, idPaciente);
 
 
-        if (contadorSinalVital == 0)
-            modeloMedicaoSinalVital.write(System.out, "TURTLE");
+        //if (contadorSinalVital == 0)
+        //modeloMedicaoSinalVital.write(System.out, "TURTLE");
 
         ByteArrayOutputStream baosContextoFiltrado = new ByteArrayOutputStream();
         modeloMedicaoSinalVital.write(baosContextoFiltrado, tipoSerializacao, caminhoSchemaOntologico);

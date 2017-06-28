@@ -51,7 +51,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
         this.startConfigurationService("./settings/topics_bloodPressure.json");
         //this.hermesBaseManager = this.getCommunicationService();
         this.representationService = this.getRepresentationService();
-        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.tempoTotalMedida = Integer.parseInt(tempo[0])+4;
         this.intervalos = Integer.parseInt(tempo[1]);
     }
 
@@ -71,7 +71,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
         // int totalLinhas = reader.getLinhas().size();
         List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4, tempoTotalMedida);
 
-        Log.i("HERMES WIDGET", listaComSinaisVitais.get(0)[0]);
+        //Log.i("HERMES WIDGET", listaComSinaisVitais.get(0)[0]);
 
         int totalThreads = (listaComSinaisVitais.size()) / this.intervalos;
 
@@ -80,7 +80,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
         // Executors.newScheduledThreadPool(reader.getLinhas().size());
         threadPoolMedidas = Executors.newScheduledThreadPool(totalThreads);
 
-        Log.i("HERMES WIDGET", "Total threads: " + totalThreads);
+        //Log.i("HERMES WIDGET", "Total threads: " + totalThreads);
 
         int posicaoSistolica = 0;
         int posicaoDiastolica = 0;
@@ -97,9 +97,9 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
             }
             contador++;
         }
-        Log.i("HERMES WIDGET", "...ABPsys = " + posicaoSistolica);
-        Log.i("HERMES WIDGET", "...ABPdias = " + posicaoDiastolica);
-        Log.i("HERMES WIDGET", "...ABPmean = " + posicaoMedia);
+        //Log.i("HERMES WIDGET", "...ABPsys = " + posicaoSistolica);
+        //Log.i("HERMES WIDGET", "...ABPdias = " + posicaoDiastolica);
+       //Log.i("HERMES WIDGET", "...ABPmean = " + posicaoMedia);
 
         if (posicaoSistolica != 0) {
 
@@ -109,13 +109,13 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                     + new Date().toString();
 //            HWLog.recordLog(log);
 
-            Log.i("HERMES WIDGET", log + "\n");
+            //Log.i("HERMES WIDGET", log + "\n");
 
             int posicaoExtensao = nomeRegistro.lastIndexOf('.');
 
             String recordIdAtual = nomeRegistro.substring(0, posicaoExtensao);
 
-            Log.i("HERMES WIDGET", recordIdAtual);
+            //Log.i("HERMES WIDGET", recordIdAtual);
 
             // System.out.println("Inicio do monitoramento do paciente...");
 

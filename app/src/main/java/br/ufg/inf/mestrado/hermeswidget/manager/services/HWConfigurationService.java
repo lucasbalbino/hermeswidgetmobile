@@ -38,7 +38,7 @@ public class HWConfigurationService {
                 String nomeTopicoNotificacao = topicosParaNotificacao.get(i);
                 //hermesBaseManager.createNotificationTopic(nomeTopicoNotificacao);
 
-                System.out.println("Topico criado: " + nomeTopicoNotificacao);
+                //System.out.println("Topico criado: " + nomeTopicoNotificacao);
             }
         } catch (JSONException e) {
             e.printStackTrace();

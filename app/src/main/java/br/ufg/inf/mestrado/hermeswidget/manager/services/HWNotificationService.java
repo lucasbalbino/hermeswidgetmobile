@@ -49,7 +49,7 @@ public class HWNotificationService implements Runnable {
 
 //            HWLog.recordLog(log);
 
-            System.out.println("\n" + log);
+            //System.out.println("\n" + log);
 
 //        } else {
 //            System.out.println("Erro de publicacao no topico "

@@ -25,7 +25,10 @@ public class HermesWidgetActivity extends AppCompatActivity {
         Intent intent = getIntent();
 
         String args[] = new String[2];
-        args[0] = "5";
+
+        // QUANTIDADE DE TUPLAS PROCESSADAS
+        args[0] = "15";  // MAXIMO DE TUPLAS: 34540
+
         args[1] = "1";
 
         String arquivo = "041n.csv";
@@ -35,6 +38,7 @@ public class HermesWidgetActivity extends AppCompatActivity {
     }
 
     private String sensorBloodPressureRecord(String args[], String arquivo) {
+        Log.e("HW", "HERMES WIDGET Inicializado!!!!");
         String record = "";
 
         AssetManager assetManager = getAssets();
@@ -44,20 +48,20 @@ public class HermesWidgetActivity extends AppCompatActivity {
             registroMimic = assetManager.open("mimic/paciente-teste/" + arquivo);
             nome = "041n.csv";
         } catch (IOException e) {
-            Log.e("message: ", e.getMessage());
+            //Log.e("message: ", e.getMessage());
         }
 
-        Log.i("HERMES WIDGET", "Hermes Widget Sensor " + nome + " inicializado as " + new Date());
+        //Log.i("HERMES WIDGET", "Hermes Widget Sensor " + nome + " inicializado as " + new Date());
 
 
-        ScheduledExecutorService poolWidgets = Executors.newScheduledThreadPool(Integer.parseInt(args[1]));
+        //ScheduledExecutorService poolWidgets = Executors.newScheduledThreadPool(Integer.parseInt(args[1]));
 
         HWSensorBloodPressure widget = new HWSensorBloodPressure(registroMimic, nome, args);
 
-//        poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
+     // poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
 
         record = widget.getRecordRDF().toString();
-
+        Log.e("HW", "HERMES WIDGET FINALIZADO!!!!");
         return record;
     }
 }
