@@ -2,9 +2,11 @@ package br.ufg.inf.mestrado.hermeswidgetmobile;
 
 import android.content.Intent;
 import android.content.res.AssetManager;
+import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.view.MenuItem;
 import android.widget.TextView;
 
 import java.io.IOException;
@@ -16,13 +18,20 @@ import java.util.concurrent.ScheduledExecutorService;
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.bloodPressure.HWSensorBloodPressure;
 
 public class HermesWidgetActivity extends AppCompatActivity {
+    long estimatedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_hermes_widget);
 
-        Intent intent = getIntent();
+        this.getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+    }
+
+    @Override
+    protected void onStart() {
+        super.onStart();
+        this.estimatedTime = 0;
 
         String args[] = new String[3];
 
@@ -39,9 +48,35 @@ public class HermesWidgetActivity extends AppCompatActivity {
 
         TextView textView = (TextView) findViewById(R.id.textView);
         textView.setText(sensorBloodPressureRecord(args, arquivo));
+
+        TextView textWidget = (TextView) findViewById(R.id.textView5);
+        textWidget.setText("BloodPressure");
+
+        TextView textArg0 = (TextView) findViewById(R.id.textView7);
+        textArg0.setText(args[0]);
+        TextView textArg1 = (TextView) findViewById(R.id.textView9);
+        textArg1.setText(args[1]);
+        TextView textArg2 = (TextView) findViewById(R.id.textView11);
+        textArg2.setText(args[2]);
+
+        TextView textEstimatedTime = (TextView) findViewById(R.id.textView2);
+        String time = this.estimatedTime + " ms";
+        textEstimatedTime.setText(time);
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(MenuItem item) {
+        switch (item.getItemId()) {
+            // Respond to the action bar's Up/Home button
+            case android.R.id.home:
+                NavUtils.navigateUpFromSameTask(this);
+                return true;
+        }
+        return super.onOptionsItemSelected(item);
     }
 
     private String sensorBloodPressureRecord(String args[], String arquivo) {
+        long startTime = System.currentTimeMillis();
         Log.e("HW", "HERMES WIDGET Inicializado!!!!");
         String record = "";
 
@@ -52,20 +87,15 @@ public class HermesWidgetActivity extends AppCompatActivity {
             registroMimic = assetManager.open("mimic/paciente-teste/" + arquivo);
             nome = "041n.csv";
         } catch (IOException e) {
-            //Log.e("message: ", e.getMessage());
+            Log.e("message: ", e.getMessage());
         }
-
-        //Log.i("HERMES WIDGET", "Hermes Widget Sensor " + nome + " inicializado as " + new Date());
-
-
-        //ScheduledExecutorService poolWidgets = Executors.newScheduledThreadPool(Integer.parseInt(args[1]));
 
         HWSensorBloodPressure widget = new HWSensorBloodPressure(registroMimic, nome, args);
 
-     // poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
-
         record = widget.getRecordRDF().toString();
         Log.e("HW", "HERMES WIDGET FINALIZADO!!!!");
+        estimatedTime = System.currentTimeMillis() - startTime;
+
         return record;
     }
 }
