@@ -24,12 +24,16 @@ public class HermesWidgetActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
 
-        String args[] = new String[2];
+        String args[] = new String[3];
 
-        // QUANTIDADE DE TUPLAS PROCESSADAS
-        args[0] = "15";  // MAXIMO DE TUPLAS: 34540
+        // QUANTIDADE DE TUPLAS A SEREM PROCESSADAS
+        args[0] = "500";  // MAXIMO DE TUPLAS: 34540
 
-        args[1] = "1";
+        // INTERVALO ENTRE AS TUPLAS
+        args[1] = "1"; // DEFAULT = 1
+
+        // QUANTIDADE DE REPRESENTAÇÕES OntModel EM CACHE
+        args[2] = "100";
 
         String arquivo = "041n.csv";
 

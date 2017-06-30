@@ -15,7 +15,8 @@ import java.util.concurrent.TimeUnit;
 //import br.ufg.inf.mestrado.hermesbase.HermesBaseManager;
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.general.HermesWidgetSensorClient;
 import br.ufg.inf.mestrado.hermeswidget.client.services.HWRepresentationServiceSensor;
-import br.ufg.inf.mestrado.hermeswidget.client.utils.HWLog;
+//import br.ufg.inf.mestrado.hermeswidget.client.utils.HWLog;
+import com.hp.hpl.jena.ontology.OntModel;
 import br.ufg.inf.mestrado.hermeswidget.client.utils.ReaderCSV;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
 
@@ -41,6 +42,10 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
 
     private int intervalos = 0;
 
+    private OntModel[] cache;
+
+    private int tamCache;
+
     private Writer recordRDF;
 
     long tTotalRepresentation;
@@ -63,6 +68,13 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
         this.representationService = this.getRepresentationService();
         this.tempoTotalMedida = Integer.parseInt(tempo[0]);
         this.intervalos = Integer.parseInt(tempo[1]);
+        this.tamCache = Integer.parseInt(tempo[2]);
+
+        cache = new OntModel[tamCache];
+        int contadorCache = 0;
+        for(int i = 0; i < tamCache; i++)
+            cache[i] = null;
+
 
         this.recordRDF = new StringWriter();
 
@@ -141,7 +153,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                             medicaoAtual[posicaoSistolica].substring(0, medicaoAtual[posicaoSistolica].lastIndexOf('.'))};
 
                     HWTransferObject hermesWidgetTO = representationService.startRepresentationSensor(
-                            "temperatura_corporea.ttl",
+                            "pressao_arterial.ttl",
                             Integer.toString(segundos),
                             "PresSang",
                             contadorP,
@@ -196,6 +208,10 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                 // representationService.modeloMedicaoSinalVital.write(System.out,
                 // "TURTLE");
                 //
+
+                // Guarda em cache as ultimas N representações em formato OntModel
+                cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                contadorCache = (contadorCache+1) % tamCache;
 
                 representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
 

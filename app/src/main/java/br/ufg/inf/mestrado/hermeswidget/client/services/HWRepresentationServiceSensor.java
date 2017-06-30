@@ -302,6 +302,10 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         this.modeloMedicaoSinalVital = modeloMedicaoSinalVital;
     }
 
+    public OntModel getModeloMedicaoSinalVital(){
+        return this.modeloMedicaoSinalVital;
+    }
+
 
     public HWTransferObject getDataTransferObject(String idPaciente, String nomeClasseSinalVital, String complementoTopico, byte[] medidaByteArray, String valorMedidaColetada, String instanteMedidaColetada) {
 
