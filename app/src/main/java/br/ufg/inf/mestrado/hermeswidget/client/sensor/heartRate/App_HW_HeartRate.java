@@ -33,7 +33,7 @@ public class App_HW_HeartRate extends HermesWidgetObjects {
 			
 			HWSensorHeartRate widget = new HWSensorHeartRate(registroAtual, args);
 			
-			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
+//			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
 			
 		}
 		

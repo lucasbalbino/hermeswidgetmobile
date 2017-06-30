@@ -13,8 +13,13 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
     }
 
-    public void iniciarHW(View view) {
-        Intent intent = new Intent(this, HermesWidgetActivity.class);
+    public void iniciarHWBloodPressure(View view) {
+        Intent intent = new Intent(this, HermesWidgetActivity.class).putExtra("HWType", "BloodPressure");
+        startActivity(intent);
+    }
+
+    public void iniciarHWHeartRate(View view) {
+        Intent intent = new Intent(this, HermesWidgetActivity.class).putExtra("HWType", "HeartRate");
         startActivity(intent);
     }
 }

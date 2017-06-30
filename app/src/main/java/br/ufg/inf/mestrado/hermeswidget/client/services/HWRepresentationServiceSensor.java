@@ -3,6 +3,7 @@ package br.ufg.inf.mestrado.hermeswidget.client.services;
 import java.io.ByteArrayOutputStream;
 import java.util.Date;
 import java.util.GregorianCalendar;
+import java.util.Objects;
 import java.util.UUID;
 
 import javax.xml.datatype.DatatypeConfigurationException;
@@ -86,7 +87,7 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         hermesWidgetTO.setContexto(byteArray);
         hermesWidgetTO.setCaminhoOntologia(caminhoSchemaOntologico);
         hermesWidgetTO.setTipoSerializacao(tipoSerializacao);
-        if (abreveaturaSinalVital == "Temp") {
+        if (abreveaturaSinalVital.equals("Temp") || abreveaturaSinalVital.equals("FreqPulso")) {
             hermesWidgetTO.setSensorValue(medidaColetada);
         } else {
             hermesWidgetTO.setSensorValue(medidaComposta[0] + " e " + medidaComposta[1]);

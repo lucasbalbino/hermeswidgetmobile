@@ -1,6 +1,5 @@
 package br.ufg.inf.mestrado.hermeswidgetmobile;
 
-import android.content.Intent;
 import android.content.res.AssetManager;
 import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
@@ -11,11 +10,9 @@ import android.widget.TextView;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Date;
-import java.util.concurrent.Executors;
-import java.util.concurrent.ScheduledExecutorService;
 
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.bloodPressure.HWSensorBloodPressure;
+import br.ufg.inf.mestrado.hermeswidget.client.sensor.heartRate.HWSensorHeartRate;
 
 public class HermesWidgetActivity extends AppCompatActivity {
     long estimatedTime;
@@ -33,6 +30,8 @@ public class HermesWidgetActivity extends AppCompatActivity {
         super.onStart();
         this.estimatedTime = 0;
 
+        String type = getIntent().getStringExtra("HWType");
+
         String args[] = new String[3];
 
         // QUANTIDADE DE TUPLAS A SEREM PROCESSADAS
@@ -47,10 +46,10 @@ public class HermesWidgetActivity extends AppCompatActivity {
         String arquivo = "041n.csv";
 
         TextView textView = (TextView) findViewById(R.id.textView);
-        textView.setText(sensorBloodPressureRecord(args, arquivo));
+        textView.setText(sensorRecord(args, arquivo, type));
 
         TextView textWidget = (TextView) findViewById(R.id.textView5);
-        textWidget.setText("BloodPressure");
+        textWidget.setText(type);
 
         TextView textArg0 = (TextView) findViewById(R.id.textView7);
         textArg0.setText(args[0]);
@@ -75,24 +74,27 @@ public class HermesWidgetActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
-    private String sensorBloodPressureRecord(String args[], String arquivo) {
+    private String sensorRecord(String args[], String arquivo, String type) {
         long startTime = System.currentTimeMillis();
         Log.e("HW", "HERMES WIDGET Inicializado!!!!");
         String record = "";
 
         AssetManager assetManager = getAssets();
         InputStream registroMimic = null;
-        String nome = "";
         try {
             registroMimic = assetManager.open("mimic/paciente-teste/" + arquivo);
-            nome = "041n.csv";
         } catch (IOException e) {
             Log.e("message: ", e.getMessage());
         }
 
-        HWSensorBloodPressure widget = new HWSensorBloodPressure(registroMimic, nome, args);
+        if(type.equals("BloodPressure")) {
+            HWSensorBloodPressure widget = new HWSensorBloodPressure(registroMimic, arquivo, args);
+            record = widget.getRecordRDF().toString();
+        } else if(type.equals("HeartRate")) {
+            HWSensorHeartRate widget = new HWSensorHeartRate(registroMimic, arquivo, args);
+            record = widget.getRecordRDF().toString();
+        }
 
-        record = widget.getRecordRDF().toString();
         Log.e("HW", "HERMES WIDGET FINALIZADO!!!!");
         estimatedTime = System.currentTimeMillis() - startTime;
 
