@@ -63,7 +63,7 @@ public class HWSensorHeartRate extends HermesWidgetSensorClient {
 //		this.startConfigurationService("./settings/topics_heartRate.json");
 //		this.hermesBaseManager = this.getCommunicationService();
         this.representationService = this.getRepresentationService();
-        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.tempoTotalMedida = Integer.parseInt(tempo[0])+4;
         this.intervalos = Integer.parseInt(tempo[1]);
         this.tamCache = Integer.parseInt(tempo[2]);
 

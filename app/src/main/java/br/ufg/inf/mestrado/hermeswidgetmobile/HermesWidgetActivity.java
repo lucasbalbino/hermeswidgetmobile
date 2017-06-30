@@ -15,7 +15,7 @@ import br.ufg.inf.mestrado.hermeswidget.client.sensor.bloodPressure.HWSensorBloo
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.heartRate.HWSensorHeartRate;
 
 public class HermesWidgetActivity extends AppCompatActivity {
-    long estimatedTime;
+    double estimatedTime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -41,7 +41,7 @@ public class HermesWidgetActivity extends AppCompatActivity {
         args[1] = "1"; // DEFAULT = 1
 
         // QUANTIDADE DE REPRESENTAÇÕES OntModel EM CACHE
-        args[2] = "100";
+        args[2] = "1";
 
         String arquivo = "041n.csv";
 
@@ -59,7 +59,7 @@ public class HermesWidgetActivity extends AppCompatActivity {
         textArg2.setText(args[2]);
 
         TextView textEstimatedTime = (TextView) findViewById(R.id.textView2);
-        String time = this.estimatedTime + " ms";
+        String time = this.estimatedTime + " s";
         textEstimatedTime.setText(time);
     }
 
@@ -96,7 +96,7 @@ public class HermesWidgetActivity extends AppCompatActivity {
         }
 
         Log.e("HW", "HERMES WIDGET FINALIZADO!!!!");
-        estimatedTime = System.currentTimeMillis() - startTime;
+        estimatedTime = (System.currentTimeMillis() - startTime)/1000.0;
 
         return record;
     }
