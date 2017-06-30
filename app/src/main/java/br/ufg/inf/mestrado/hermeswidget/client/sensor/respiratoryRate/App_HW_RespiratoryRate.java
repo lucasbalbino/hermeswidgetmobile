@@ -33,7 +33,7 @@ public class App_HW_RespiratoryRate extends HermesWidgetObjects {
 			
 			HWSensorRespiratoryRate widget = new HWSensorRespiratoryRate(registroAtual, args);
 			
-			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
+//			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
 			
 		}
 		

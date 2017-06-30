@@ -1,6 +1,11 @@
 package br.ufg.inf.mestrado.hermeswidget.client.sensor.temperature;
 
+import com.hp.hpl.jena.ontology.OntModel;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -14,7 +19,7 @@ import br.ufg.inf.mestrado.hermeswidget.client.utils.HWLog;
 import br.ufg.inf.mestrado.hermeswidget.client.utils.ReaderCSV;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
 
-public class HWSensorTemperature extends HermesWidgetSensorClient implements Runnable {
+public class HWSensorTemperature extends HermesWidgetSensorClient {
 
     // Instancia do servico de comunicacao
 //	private HermesBaseManager hermesBaseManager;
@@ -25,15 +30,25 @@ public class HWSensorTemperature extends HermesWidgetSensorClient implements Run
 
     private ScheduledExecutorService threadPoolMedidas;
 
-    private File registroMimic;
+    private InputStream registroMimic;
+    private File registroMimicFile;
+
+    private String nomeRegistro;
 
     private int tempoTotalMedida = 0;
+
     private int intervalos = 0;
+
+    private OntModel[] cache;
+
+    private int tamCache;
+
+    private Writer recordRDF;
 
     long tTotalRepresentation;
 
     public HWSensorTemperature(File registroAtual, String tempo[]) {
-        this.registroMimic = registroAtual;
+        this.registroMimicFile = registroAtual;
         this.startConfigurationService("./settings/topics_temperature.json");
 //		this.hermesBaseManager = this.getCommunicationService();
         this.representationService = this.getRepresentationService();
@@ -41,16 +56,29 @@ public class HWSensorTemperature extends HermesWidgetSensorClient implements Run
         this.intervalos = Integer.parseInt(tempo[1]);
     }
 
-    @Override
-    public void run() {
+    public HWSensorTemperature(InputStream registroAtual, String nome, String tempo[]) {
+        this.registroMimic = registroAtual;
+        this.nomeRegistro = nome;
+//        this.startConfigurationService("./settings/topics_temperature.json");
+//		this.hermesBaseManager = this.getCommunicationService();
+        this.representationService = this.getRepresentationService();
+        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.intervalos = Integer.parseInt(tempo[1]);
+        this.tamCache = Integer.parseInt(tempo[2]);
+
+        cache = new OntModel[tamCache];
+        int contadorCache = 0;
+        for(int i = 0; i < tamCache; i++)
+            cache[i] = null;
+
+
+        this.recordRDF = new StringWriter();
 
         ReaderCSV reader = new ReaderCSV(this.registroMimic);
 
         // int totalLinhas = reader.getLinhas().size();
         List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4, tempoTotalMedida);
         int totalThreads = (listaComSinaisVitais.size()) / intervalos;
-
-        System.out.println("Total threads: " + totalThreads);
 
         // Prepara o pool de threads
         threadPoolMedidas = Executors.newScheduledThreadPool(totalThreads);
@@ -72,16 +100,13 @@ public class HWSensorTemperature extends HermesWidgetSensorClient implements Run
 			 * Log
 			 */
             String log = "Hermes Widget Sensor Temperature for patient ---> "
-                    + this.registroMimic.getName() + " started! In: "
+                    + this.nomeRegistro + " started! In: "
                     + new Date().toString();
-            HWLog.recordLog(log);
-            System.out.println(log + "\n");
+//            HWLog.recordLog(log);
 
-            int posicaoExtensao = registroMimic.getName().lastIndexOf('.');
+            int posicaoExtensao = this.nomeRegistro.lastIndexOf('.');
 
-            String recordIdAtual = registroMimic.getName().substring(0, posicaoExtensao);
-
-            System.out.println(recordIdAtual);
+            String recordIdAtual = this.nomeRegistro.substring(0, posicaoExtensao);
 
             // Laco para verificar os metadados de cada paciente e as
             // informacoes de leitura dos sinais vitais
@@ -138,6 +163,12 @@ public class HWSensorTemperature extends HermesWidgetSensorClient implements Run
 
                     // Limpa o modelo de representacao para a proxima instancia
 
+                    // Guarda em cache as ultimas N representações em formato OntModel
+                    cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                    contadorCache = (contadorCache+1) % tamCache;
+
+                    representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
+
                     representationService.setModeloMedicaoSinalVital(null);
 
                     contadorThreads++;
@@ -147,6 +178,10 @@ public class HWSensorTemperature extends HermesWidgetSensorClient implements Run
             }
         }
 
+    }
+
+    public Writer getRecordRDF() {
+        return this.recordRDF;
     }
 
 }

@@ -2,6 +2,9 @@
     <string name="app_name">HW Mobile</string>
     <string name="button_hw1">HW BloodPressure</string>
     <string name="button_hw2">HW HeartRate</string>
+    <string name="button_hw3">HW OxygenSaturation</string>
+    <string name="button_hw4">HW RespiratoryRate</string>
+    <string name="button_hw5">HW Temperature</string>
     <string name="textview">TextView</string>
     <string name="text_estimated_time">textEstimatedTime</string>
     <string name="label_textview">Representação Turtle:</string>

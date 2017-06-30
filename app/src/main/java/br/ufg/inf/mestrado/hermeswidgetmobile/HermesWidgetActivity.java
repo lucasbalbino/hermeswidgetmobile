@@ -13,6 +13,9 @@ import java.io.InputStream;
 
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.bloodPressure.HWSensorBloodPressure;
 import br.ufg.inf.mestrado.hermeswidget.client.sensor.heartRate.HWSensorHeartRate;
+import br.ufg.inf.mestrado.hermeswidget.client.sensor.oxygenSaturation.HWSensorOxygenSaturation;
+import br.ufg.inf.mestrado.hermeswidget.client.sensor.respiratoryRate.HWSensorRespiratoryRate;
+import br.ufg.inf.mestrado.hermeswidget.client.sensor.temperature.HWSensorTemperature;
 
 public class HermesWidgetActivity extends AppCompatActivity {
     long estimatedTime;
@@ -92,6 +95,15 @@ public class HermesWidgetActivity extends AppCompatActivity {
             record = widget.getRecordRDF().toString();
         } else if(type.equals("HeartRate")) {
             HWSensorHeartRate widget = new HWSensorHeartRate(registroMimic, arquivo, args);
+            record = widget.getRecordRDF().toString();
+        } else if(type.equals("OxygenSaturation")) {
+            HWSensorOxygenSaturation widget = new HWSensorOxygenSaturation(registroMimic, arquivo, args);
+            record = widget.getRecordRDF().toString();
+        } else if(type.equals("RespiratoryRate")) {
+            HWSensorRespiratoryRate widget = new HWSensorRespiratoryRate(registroMimic, arquivo, args);
+            record = widget.getRecordRDF().toString();
+        } else if(type.equals("Temperature")) {
+            HWSensorTemperature widget = new HWSensorTemperature(registroMimic, arquivo, args);
             record = widget.getRecordRDF().toString();
         }
 

@@ -87,7 +87,7 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         hermesWidgetTO.setContexto(byteArray);
         hermesWidgetTO.setCaminhoOntologia(caminhoSchemaOntologico);
         hermesWidgetTO.setTipoSerializacao(tipoSerializacao);
-        if (abreveaturaSinalVital.equals("Temp") || abreveaturaSinalVital.equals("FreqPulso")) {
+        if (!abreveaturaSinalVital.equals("PresSang")) {
             hermesWidgetTO.setSensorValue(medidaColetada);
         } else {
             hermesWidgetTO.setSensorValue(medidaComposta[0] + " e " + medidaComposta[1]);

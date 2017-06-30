@@ -46,7 +46,7 @@ public class App_HW_Temperature {
 			
 			// 15 - delay para montar o modelo
 			//poolWidgets.schedule(widget, 15, TimeUnit.SECONDS);
-			poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
+//			poolWidgets.schedule(widget, 2, TimeUnit.SECONDS);
 			
 		}
 		

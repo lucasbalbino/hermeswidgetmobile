@@ -34,7 +34,7 @@ public class App_HW_OxygenSaturation extends HermesWidgetObjects {
 			HWSensorOxygenSaturation widget = new HWSensorOxygenSaturation(registroAtual, args);
 			
 			// 15?
-			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
+//			poolWidgets.schedule(widget, 5, TimeUnit.SECONDS);
 			
 		}
 		

@@ -1,6 +1,11 @@
 package br.ufg.inf.mestrado.hermeswidget.client.sensor.oxygenSaturation;
 
+import com.hp.hpl.jena.ontology.OntModel;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -18,23 +23,32 @@ import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
  * @author Ernesto
  */
 
-public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
-        implements Runnable {
+public class HWSensorOxygenSaturation extends HermesWidgetSensorClient {
 
     //	private HermesBaseManager hermesBaseManager;
     private HWRepresentationServiceSensor representationService;
 
     //private HashMap<String, String> objects;
 
+    private InputStream registroMimic;
+    private File registroMimicFile;
+
+    private String nomeRegistro;
+
     private ScheduledExecutorService threadPoolMedidas = null;
 
-    private File registroMimic;
     private int tempoTotalMedida = 0;
 
     private int intervalos = 0;
 
+    private OntModel[] cache;
+
+    private int tamCache;
+
+    private Writer recordRDF;
+
     public HWSensorOxygenSaturation(File registroAtual, String tempo[]) {
-        this.registroMimic = registroAtual;
+        this.registroMimicFile = registroAtual;
         this.startConfigurationService("./settings/topics_oxygenSaturation.json");
 //		this.hermesBaseManager = this.getCommunicationService();
         this.representationService = this.getRepresentationService();
@@ -43,8 +57,23 @@ public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
         //this.objects = objects;
     }
 
-    @Override
-    public void run() {
+    public HWSensorOxygenSaturation(InputStream registroAtual, String nome, String tempo[]) {
+        this.registroMimic = registroAtual;
+        this.nomeRegistro = nome;
+//        this.startConfigurationService("./settings/topics_oxygenSaturation.json");
+//		this.hermesBaseManager = this.getCommunicationService();
+        this.representationService = this.getRepresentationService();
+        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.intervalos = Integer.parseInt(tempo[1]);
+        //this.objects = objects;
+        this.tamCache = Integer.parseInt(tempo[2]);
+
+        cache = new OntModel[tamCache];
+        int contadorCache = 0;
+        for(int i = 0; i < tamCache; i++)
+            cache[i] = null;
+
+        this.recordRDF = new StringWriter();
 
         ReaderCSV reader = new ReaderCSV(this.registroMimic);
 
@@ -52,8 +81,6 @@ public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
         List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4,
                 tempoTotalMedida);
         int totalThreads = (listaComSinaisVitais.size()) / intervalos;
-
-        System.out.println("Total threads: " + totalThreads);
 
         // Prepara o pool de threads
         threadPoolMedidas = Executors.newScheduledThreadPool(totalThreads);
@@ -67,23 +94,19 @@ public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
             }
             contador++;
         }
-        System.out.println("...SpO2 = " + posicaoSinalVital);
 
         if (posicaoSinalVital != 0) {
 
             String log = "Hermes Widget Sensor Oxigen Saturation for patient ---> "
-                    + this.registroMimic.getName()
+                    + this.nomeRegistro
                     + " started! Date: "
                     + new Date().toString();
-            HWLog.recordLog(log);
-            System.out.println(log + "\n");
+//            HWLog.recordLog(log);
 
-            int posicaoExtensao = registroMimic.getName().lastIndexOf('.');
+            int posicaoExtensao = this.nomeRegistro.lastIndexOf('.');
 
-            String recordIdAtual = registroMimic.getName().substring(0,
+            String recordIdAtual = this.nomeRegistro.substring(0,
                     posicaoExtensao);
-
-            System.out.println("Paciente: " + recordIdAtual);
 
             // Laco para verificar os metadados de cada paciente e as
             // informacoes de leitura dos sinais vitais
@@ -128,6 +151,12 @@ public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
                     // representationService.modeloMedicaoSinalVital.write(System.out,
                     // "TURTLE");
                     //
+
+                    // Guarda em cache as ultimas N representações em formato OntModel
+                    cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                    contadorCache = (contadorCache+1) % tamCache;
+
+                    representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
                     representationService.setModeloMedicaoSinalVital(null);
 
                     contadorThreads++;
@@ -136,6 +165,9 @@ public class HWSensorOxygenSaturation extends HermesWidgetSensorClient
             }
         }
 
+    }
+    public Writer getRecordRDF() {
+        return this.recordRDF;
     }
 
 }

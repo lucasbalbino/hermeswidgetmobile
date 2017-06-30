@@ -1,6 +1,11 @@
 package br.ufg.inf.mestrado.hermeswidget.client.sensor.respiratoryRate;
 
+import com.hp.hpl.jena.ontology.OntModel;
+
 import java.io.File;
+import java.io.InputStream;
+import java.io.StringWriter;
+import java.io.Writer;
 import java.util.Date;
 import java.util.List;
 import java.util.concurrent.Executors;
@@ -15,126 +20,153 @@ import br.ufg.inf.mestrado.hermeswidget.client.utils.ReaderCSV;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
 
 /**
- * 
  * @author Ernesto
- * 
  */
 
-public class HWSensorRespiratoryRate extends HermesWidgetSensorClient implements Runnable {
+public class HWSensorRespiratoryRate extends HermesWidgetSensorClient {
 
 //	private HermesBaseManager hermesBaseManager;
 
-	private HWRepresentationServiceSensor representationService;
-	
-	//private HashMap<String, String> objects;
+    private HWRepresentationServiceSensor representationService;
 
-	private ScheduledExecutorService threadPoolMedidas = null;
+    //private HashMap<String, String> objects;
 
-	private File registroMimic;
-	private int tempoTotalMedida = 0;
+    private ScheduledExecutorService threadPoolMedidas = null;
 
-	private int intervalos = 0;
+    private InputStream registroMimic;
+    private File registroMimicFile;
 
-	public HWSensorRespiratoryRate(File registroAtual, String tempo[]) {
-		this.registroMimic = registroAtual;
-		this.startConfigurationService("./settings/topics_respiratoryRate.json");
+    private String nomeRegistro;
+    private int tempoTotalMedida = 0;
+
+    private int intervalos = 0;
+
+    private OntModel[] cache;
+
+    private int tamCache;
+
+    private Writer recordRDF;
+
+    public HWSensorRespiratoryRate(File registroAtual, String tempo[]) {
+        this.registroMimicFile = registroAtual;
+        this.startConfigurationService("./settings/topics_respiratoryRate.json");
 //		this.hermesBaseManager = this.getCommunicationService();
-		this.representationService = this.getRepresentationService();
-		this.tempoTotalMedida = Integer.parseInt(tempo[0]);
-		this.intervalos = Integer.parseInt(tempo[1]);
-		//this.objects = objects;
-	}
+        this.representationService = this.getRepresentationService();
+        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.intervalos = Integer.parseInt(tempo[1]);
+        //this.objects = objects;
+    }
 
-	@Override
-	public void run() {
-		ReaderCSV reader = new ReaderCSV(this.registroMimic);
+    public HWSensorRespiratoryRate(InputStream registroAtual, String nome, String tempo[]) {
+        this.registroMimic = registroAtual;
+        this.nomeRegistro = nome;
+//        this.startConfigurationService("./settings/topics_respiratoryRate.json");
+//		this.hermesBaseManager = this.getCommunicationService();
+        this.representationService = this.getRepresentationService();
+        this.tempoTotalMedida = Integer.parseInt(tempo[0]);
+        this.intervalos = Integer.parseInt(tempo[1]);
+        this.tamCache = Integer.parseInt(tempo[2]);
+        //this.objects = objects;
 
-		// int totalLinhas = reader.getLinhas().size();
-		List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4,
-				tempoTotalMedida);
-		int totalThreads = (listaComSinaisVitais.size()) / intervalos;
+        cache = new OntModel[tamCache];
+        int contadorCache = 0;
+        for(int i = 0; i < tamCache; i++)
+            cache[i] = null;
 
-		System.out.println("Total threads: "+totalThreads);
-		
-		// Prepara o pool de threads
-		threadPoolMedidas = Executors.newScheduledThreadPool(totalThreads);
 
-		int posicaoSinalVital = 0;
-		String[] cabecalho = reader.getLinhas().get(0);
-		int contador = 0;
-		for (String colunaCabecalho : cabecalho) {
-			if (colunaCabecalho.equals("'RESP'")) {
-				posicaoSinalVital = contador;
-			}
-			contador++;
-		}
-		System.out.println("...RESP = " + posicaoSinalVital);
+        this.recordRDF = new StringWriter();
 
-		if (posicaoSinalVital != 0) {
+        ReaderCSV reader = new ReaderCSV(this.registroMimic);
 
-			String log = "Hermes Widget Sensor Respiratory Rate for patient ---> "
-					+ this.registroMimic.getName()
-					+ " started! Date: "
-					+ new Date().toString();
-			HWLog.recordLog(log);
+        // int totalLinhas = reader.getLinhas().size();
+        List<String[]> listaComSinaisVitais = reader.getLinhas().subList(4,
+                tempoTotalMedida);
+        int totalThreads = (listaComSinaisVitais.size()) / intervalos;
 
-			System.out.println(log + "\n");
+        // Prepara o pool de threads
+        threadPoolMedidas = Executors.newScheduledThreadPool(totalThreads);
 
-			int posicaoExtensao = registroMimic.getName().lastIndexOf('.');
+        int posicaoSinalVital = 0;
+        String[] cabecalho = reader.getLinhas().get(0);
+        int contador = 0;
+        for (String colunaCabecalho : cabecalho) {
+            if (colunaCabecalho.equals("'RESP'")) {
+                posicaoSinalVital = contador;
+            }
+            contador++;
+        }
 
-			String recordIdAtual = registroMimic.getName().substring(0,
-					posicaoExtensao);
+        if (posicaoSinalVital != 0) {
 
-			System.out.println("Paciente: "+recordIdAtual);
+            String log = "Hermes Widget Sensor Respiratory Rate for patient ---> "
+                    + this.nomeRegistro
+                    + " started! Date: "
+                    + new Date().toString();
+//            HWLog.recordLog(log);
 
-			// Laco para verificar os metadados de cada paciente e as
-			// informacoes de leitura dos sinais vitais
-			int contadorRespRate = 0;
-			int contadorLinhas = 0;
-			int contadorThreads = 1;
-			for (String[] medicaoAtual : listaComSinaisVitais) {
-				if (contadorLinhas % intervalos == 0) {
-					// int segundos = Integer.valueOf(medicaoAtual[0]);
-					float segfloat = Float.valueOf(medicaoAtual[0]);
-					int segundos = Math.round(segfloat);
+            int posicaoExtensao = this.nomeRegistro.lastIndexOf('.');
 
-					int contadorRR = contadorRespRate++;
+            String recordIdAtual = this.nomeRegistro.substring(0,
+                    posicaoExtensao);
 
-					//System.out.println(medicaoAtual[posicaoSinalVital] +" - "+ contadorRR);
+            // Laco para verificar os metadados de cada paciente e as
+            // informacoes de leitura dos sinais vitais
+            int contadorRespRate = 0;
+            int contadorLinhas = 0;
+            int contadorThreads = 1;
+            for (String[] medicaoAtual : listaComSinaisVitais) {
+                if (contadorLinhas % intervalos == 0) {
+                    // int segundos = Integer.valueOf(medicaoAtual[0]);
+                    float segfloat = Float.valueOf(medicaoAtual[0]);
+                    int segundos = Math.round(segfloat);
 
-					HWTransferObject hermesWidgetTO = representationService.startRepresentationSensor(
-									"frequencia_respiratoria.ttl",
-									Integer.toString(segundos), 
-									"FreqResp",
-									contadorRR, 
-									"VSO_0000035",
-									medicaoAtual[posicaoSinalVital].substring(0, medicaoAtual[posicaoSinalVital].lastIndexOf('.')),
-									null,
-									"mrpm",
-									recordIdAtual
-					);
+                    int contadorRR = contadorRespRate++;
 
-					hermesWidgetTO.setThreadAtual(contadorThreads);
-					hermesWidgetTO.setTotalThreads(totalThreads);
+                    //System.out.println(medicaoAtual[posicaoSinalVital] +" - "+ contadorRR);
 
-					// REMOVENDO O HERMES BASE
+                    HWTransferObject hermesWidgetTO = representationService.startRepresentationSensor(
+                            "frequencia_respiratoria.ttl",
+                            Integer.toString(segundos),
+                            "FreqResp",
+                            contadorRR,
+                            "VSO_0000035",
+                            medicaoAtual[posicaoSinalVital].substring(0, medicaoAtual[posicaoSinalVital].lastIndexOf('.')),
+                            null,
+                            "mrpm",
+                            recordIdAtual
+                    );
+
+                    hermesWidgetTO.setThreadAtual(contadorThreads);
+                    hermesWidgetTO.setTotalThreads(totalThreads);
+
+                    // REMOVENDO O HERMES BASE
 //					threadPoolMedidas.schedule(this.getNotificationService(
 //							hermesBaseManager, hermesWidgetTO), segundos,
 //							TimeUnit.SECONDS);
 
-					threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos,
-							TimeUnit.SECONDS);
+                    threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos,
+                            TimeUnit.SECONDS);
 
-					// if (contadorLinhas==0)
-					// representationService.modeloMedicaoSinalVital.write(System.out,
-					// "TURTLE");
-					//
-					representationService.setModeloMedicaoSinalVital(null);
+                    // if (contadorLinhas==0)
+                    // representationService.modeloMedicaoSinalVital.write(System.out,
+                    // "TURTLE");
+                    //
 
-					contadorThreads++;
-				}
-				contadorLinhas++;
-			}
-		}
-	}
+                    // Guarda em cache as ultimas N representações em formato OntModel
+                    cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                    contadorCache = (contadorCache+1) % tamCache;
+
+                    representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
+                    representationService.setModeloMedicaoSinalVital(null);
+
+                    contadorThreads++;
+                }
+                contadorLinhas++;
+            }
+        }
+    }
+
+    public Writer getRecordRDF() {
+        return this.recordRDF;
+    }
 }
