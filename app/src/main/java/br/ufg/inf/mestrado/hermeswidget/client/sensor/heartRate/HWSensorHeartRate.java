@@ -18,6 +18,7 @@ import br.ufg.inf.mestrado.hermeswidget.client.services.HWRepresentationServiceS
 import br.ufg.inf.mestrado.hermeswidget.client.utils.HWLog;
 import br.ufg.inf.mestrado.hermeswidget.client.utils.ReaderCSV;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
+import br.ufg.inf.mestrado.hermeswidgetmobile.MainActivity;
 
 /**
  * @author Ernesto
@@ -160,7 +161,7 @@ public class HWSensorHeartRate extends HermesWidgetSensorClient {
                 contadorLinhas++;
             }
         }
-
+        MainActivity.setCache(cache);
     }
 
     public Writer getRecordRDF() {

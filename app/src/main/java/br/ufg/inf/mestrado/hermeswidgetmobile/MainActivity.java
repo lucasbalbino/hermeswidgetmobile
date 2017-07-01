@@ -5,7 +5,17 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.view.View;
 
+import com.hp.hpl.jena.iri.impl.Main;
+import com.hp.hpl.jena.ontology.OntModel;
+
 public class MainActivity extends AppCompatActivity {
+    private static OntModel[] cache = null;
+
+    public static void setCache(OntModel[] cache){MainActivity.cache = cache;}
+
+    public static OntModel[] getCache() {return MainActivity.cache;}
+
+    public static OntModel getCache(int index) {return MainActivity.cache[index];}
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
 
     public void iniciarHWTemperature(View view) {
         Intent intent = new Intent(this, HermesWidgetActivity.class).putExtra("HWType", "Temperature");
+        startActivity(intent);
+    }
+
+    public void consultaCache(View view){
+        Intent intent = new Intent(this, QueryActivity.class);
         startActivity(intent);
     }
 }

@@ -19,6 +19,7 @@ import br.ufg.inf.mestrado.hermeswidget.client.services.HWRepresentationServiceS
 import com.hp.hpl.jena.ontology.OntModel;
 import br.ufg.inf.mestrado.hermeswidget.client.utils.ReaderCSV;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
+import br.ufg.inf.mestrado.hermeswidgetmobile.MainActivity;
 
 /**
  * @author Ernesto
@@ -221,6 +222,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
             }
             contadorLinhas++;
         }
+        MainActivity.setCache(cache);
     }
 
     public Writer getRecordRDF() {

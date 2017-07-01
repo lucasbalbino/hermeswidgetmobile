@@ -5,6 +5,7 @@ import android.support.v4.app.NavUtils;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.util.Log;
+import android.content.Intent;
 import android.view.MenuItem;
 import android.widget.TextView;
 
@@ -38,13 +39,13 @@ public class HermesWidgetActivity extends AppCompatActivity {
         String args[] = new String[3];
 
         // QUANTIDADE DE TUPLAS A SEREM PROCESSADAS
-        args[0] = "500";  // MAXIMO DE TUPLAS: 34540
+        args[0] = "30";  // MAXIMO DE TUPLAS: 34540
 
         // INTERVALO ENTRE AS TUPLAS
         args[1] = "1"; // DEFAULT = 1
 
         // QUANTIDADE DE REPRESENTAÇÕES OntModel EM CACHE
-        args[2] = "1";
+        args[2] = "10";
 
         String arquivo = "041n.csv";
 
