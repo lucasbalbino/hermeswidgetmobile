@@ -10,6 +10,7 @@ import com.hp.hpl.jena.ontology.OntModel;
 
 public class MainActivity extends AppCompatActivity {
     private static OntModel[] cache = null;
+    static int id = 0;
 
     public static void setCache(OntModel[] cache){MainActivity.cache = cache;}
 
