@@ -141,8 +141,8 @@ public class HWSensorHeartRate extends HermesWidgetSensorClient {
 //							hermesBaseManager, hermesWidgetTO), segundos,
 //							TimeUnit.SECONDS);
 
-                    threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos,
-                            TimeUnit.SECONDS);
+                   // threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos,
+                           // TimeUnit.SECONDS);
 
                     // if (contadorLinhas==0)
                     // representationService.modeloMedicaoSinalVital.write(System.out,
@@ -150,8 +150,8 @@ public class HWSensorHeartRate extends HermesWidgetSensorClient {
                     //
 
                     // Guarda em cache as ultimas N representações em formato OntModel
-                    cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
-                    contadorCache = (contadorCache+1) % tamCache;
+                    //cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                    //contadorCache = (contadorCache+1) % tamCache;
 
                     representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
 

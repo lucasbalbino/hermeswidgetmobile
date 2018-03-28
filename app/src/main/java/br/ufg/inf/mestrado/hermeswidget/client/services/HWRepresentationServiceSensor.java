@@ -14,6 +14,8 @@ import javax.xml.datatype.XMLGregorianCalendar;
 import br.ufg.inf.mestrado.hermeswidget.manager.transferObject.HWTransferObject;
 import br.ufg.inf.mestrado.hermeswidget.ontologies.M3;
 import br.ufg.inf.mestrado.hermeswidget.ontologies.SSN;
+import br.ufg.inf.mestrado.hermeswidget.ontologies.Geo;
+import br.ufg.inf.mestrado.hermeswidget.ontologies.IoT_Lite;
 
 import com.hp.hpl.jena.datatypes.xsd.XSDDatatype;
 import com.hp.hpl.jena.ontology.OntModel;
@@ -37,9 +39,6 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
 
     }
 
-    public String getID(){
-        return new UUID(r.nextLong(), r.nextLong()).toString().substring(0,12);
-    }
 	/*
 	public HWRepresentationServiceSensor(OntModel ontModel) {
 		ontModelObservation = ontModel;
@@ -49,7 +48,7 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
     public HWTransferObject startRepresentationSensor(String nomeModelo, String instanteMedidaColetada, String abreveaturaSinalVital,
                                                       int contadorSinalVital, String nomeClasseSinalVital, String medidaColetada, String[] medidaComposta, String unidadeMedida, String idPaciente) {
 
-        criarModeloRDFDeArquivo("./mimic/modelos/" + nomeModelo);
+        criarModeloRDFDeArquivo("./mimic/modelos/"+nomeModelo);
 
 		/*
 		if (allDiff == null) {
@@ -60,12 +59,10 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         modeloMedicaoSinalVital = ModelFactory.createOntologyModel();
         modeloMedicaoSinalVital.setNsPrefix("ssn","http://purl.oclc.org/NET/ssnx/ssn#");
         modeloMedicaoSinalVital.setNsPrefix("m3-lite","http://purl.org/iot/vocab/m3-lite#");
-
-
-
+        modeloMedicaoSinalVital.setNsPrefix("iot-lite","http://purl.oclc.org/NET/UNIS/fiware/iot-lite#");
 
         //String[] sensorOutput = {"sensorOutput_"+nomeClasseSinalVital};
-        String sensorOutput = "sensorOutput-" + nomeClasseSinalVital;
+        String sensorOutput = "sensorOutput-"+nomeClasseSinalVital;
         String observationValue = "observationValue";
 
         Object[] values;
@@ -78,11 +75,12 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         }
 
 
-        modeloMedicaoSinalVital = representObservation(abreveaturaSinalVital, "property-" + abreveaturaSinalVital, "sensor-" + nomeClasseSinalVital, sensorOutput, "observation-" + abreveaturaSinalVital, observationValue, values, unidadeMedida, idPaciente);
+        modeloMedicaoSinalVital = representObservation(abreveaturaSinalVital, "property-"+abreveaturaSinalVital, "sensor-"+nomeClasseSinalVital, sensorOutput, "entity-"+abreveaturaSinalVital, observationValue, values, unidadeMedida, idPaciente);
 
 
-        //if (contadorSinalVital == 0)
-        //modeloMedicaoSinalVital.write(System.out, "TURTLE");
+
+        if (contadorSinalVital == 0)
+            modeloMedicaoSinalVital.write(System.out, "TURTLE");
 
         ByteArrayOutputStream baosContextoFiltrado = new ByteArrayOutputStream();
         modeloMedicaoSinalVital.write(baosContextoFiltrado, tipoSerializacao, caminhoSchemaOntologico);
@@ -93,19 +91,19 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
 
         hermesWidgetTO = new HWTransferObject();
 
-        // ALTERACAO
+        // ALTERAÇÃO
         // hermesWidgetTO.setIdEntidade(idPaciente+"_"+nomeClasseSinalVital);
-        hermesWidgetTO.setIdEntidade("person" + idPaciente);
+        hermesWidgetTO.setIdEntidade("person"+idPaciente);
 
         hermesWidgetTO.setNomeTopico(nomeClasseSinalVital);
         hermesWidgetTO.setComplementoTopico("");
         hermesWidgetTO.setContexto(byteArray);
         hermesWidgetTO.setCaminhoOntologia(caminhoSchemaOntologico);
         hermesWidgetTO.setTipoSerializacao(tipoSerializacao);
-        if (!abreveaturaSinalVital.equals("PresSang")) {
+        if (abreveaturaSinalVital == "Temp") {
             hermesWidgetTO.setSensorValue(medidaColetada);
         } else {
-            hermesWidgetTO.setSensorValue(medidaComposta[0] + " e " + medidaComposta[1]);
+            hermesWidgetTO.setSensorValue(medidaComposta[0]+" e "+medidaComposta[1]);
         }
 
 		/* Depreciado
@@ -117,7 +115,7 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         return hermesWidgetTO;
     }
 
-    private OntModel representObservation(String sinal, String property, String sensor, String sensorOutput, String observation, String observationValue, Object[] values, String unidadeMedida, String feature) {
+    private OntModel representObservation(String sinal, String property, String sensor,  String sensorOutput, String entity, String observationValue, Object[] values, String unidadeMedida, String feature) {
 		/*
 		Set<String> chaves = HermesWidgetObjects.getPacientes().keySet();
 		for (String chave : chaves)
@@ -138,7 +136,8 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
 			object.getObjects().put(feature, featureIRI);
 		}*/
         // NOVO
-        featureIRI = SSN.NS + feature;
+        //featureIRI = SSN.NS + feature;
+        featureIRI = IoT_Lite.NS + feature;
 
         String propertyIRI; // +"-"+ UUID.randomUUID().toString();
 		/*
@@ -150,24 +149,105 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
 		}
 		*/
         // NOVO
-        propertyIRI = SSN.NS + property;
+        //propertyIRI = SSN.NS + property;
+        propertyIRI = IoT_Lite.NS + property;
 
-        String sensorIRI = SSN.NS + sensor + "-" + getID();
+        //String sensorIRI = SSN.NS + sensor +"-"+ UUID.randomUUID().toString();
+        String sensorIRI = IoT_Lite.NS + sensor +"-"+ UUID.randomUUID().toString();
         //String observationIRI = SSN.NS + observation +"-"+ UUID.randomUUID().toString();
 
-        Resource featureOfInterestResource = modeloMedicaoSinalVital
-                .createResource(featureIRI)
-                .addProperty(RDF.type, SSN.FeatureOfInterest);
 
+        // IoT-Lite: COMENTAR DEPOIS DE FAZER AS ALTERAÇÕES -> 27/03
+		/*Resource featureOfInterestResource = modeloMedicaoSinalVital
+				.createResource(featureIRI)
+					.addProperty(RDF.type, SSN.FeatureOfInterest);*/
+
+
+        // IoT-Lite: ATUALIZAR A VARIÁVEL featureIRI -> 27/03
+
+        /** Sistema */
+		/*Resource systemResource = modeloMedicaoSinalVital
+				.createResource(featureIRI)
+					.addProperty(RDF.type, SSN.System);
+					//.addProperty(RDF.type, SSN.FeatureOfInterest);*/
+
+
+        /** Device */
+		/*Resource deviceResource = modeloMedicaoSinalVital
+				.createResource(featureIRI)
+					.addProperty(RDF.type, SSN.Device);*/
+
+
+        // MANTIDO
         /**
          * An observable Quality of an Event or Object. That is, not a quality
          * of an abstract entity as is also allowed by DUL's Quality, but rather
          * an aspect of an entity that is intrinsic to and cannot exist without
          * the entity and is observable by a sensor.
          */
-        Resource propertyResource = modeloMedicaoSinalVital
-                .createResource(propertyIRI)
-                .addProperty(RDF.type, SSN.Property);
+		/*Resource propertyResource = modeloMedicaoSinalVital
+				.createResource(propertyIRI)
+					.addProperty(RDF.type, SSN.Property);*/
+
+
+        /** Sensor */
+        Resource sensorResource = modeloMedicaoSinalVital
+                .createResource(sensorIRI)
+                .addProperty(RDF.type, SSN.Sensor)
+                //.addProperty(SSN.observes, modeloMedicaoSinalVital
+                //		.createResource(propertyIRI))
+                //.addProperty(IoT_Lite.hasMetadata, "propertyIRI")
+                //.addProperty(IoT_Lite.hasSensingDevice, featureIRI)
+                .addProperty(IoT_Lite.hasUnit, M3.DegreeCelsius) // importar de qu
+                .addProperty(IoT_Lite.hasQuantityKind, M3.BodyTemperature); // importar de qu
+
+        /** Sensing Device INCLUIR */
+        Resource sensingDeviceResource = modeloMedicaoSinalVital
+                .createResource(IoT_Lite.NS+"device"+sinal)
+                .addProperty(RDF.type, SSN.SensingDevice)
+                .addProperty(IoT_Lite.exposedBy, sensorResource);
+        //.addProperty(SSN.hasDeployment, "");
+
+
+        /** Deployment */
+		/*Resource deploymentResource = modeloMedicaoSinalVital
+				.createResource(sensorIRI)
+					.addProperty(RDF.type, SSN.Deployment)
+					.addProperty(null, ""); // geo:hasLocation */
+
+
+        /** Attribute INCLUIR */
+		/*Resource attributeResource = modeloMedicaoSinalVital
+				.createResource(sensorIRI)
+					.addProperty(RDF.type, IoT_Lite.Attribute)
+					.addProperty(IoT_Lite.isAssociatedWith, sensorResource)
+					.addProperty(IoT_Lite.hasQuantityKind, "qu:temperature");*/
+
+
+        //LocationManager locationManager = (LocationManager) getSystemService(Context.LOCATION_SERVICE);
+
+        /** Point INCLUIR */
+        Resource locationResource = modeloMedicaoSinalVital
+                .createResource(IoT_Lite.NS +"location")
+                .addProperty(RDF.type, "geo:Point")
+                .addProperty(Geo.long_, "-49.255") // geo:long (usar LocationManager)
+                .addProperty(Geo.lat, "-16.6799"); // geo:lat (usar LocationManager)
+        //.addProperty(IoT_Lite.altRelative, "");
+
+
+        /** Service INCLUIR */
+        Resource serviceResource = modeloMedicaoSinalVital
+                .createResource(IoT_Lite.NS +"service"+sinal)
+                .addProperty(RDF.type, IoT_Lite.Service)
+                .addProperty(IoT_Lite.endpoint, "http://www.ebserh.gov.br/web/hc-ufg/sensors/measures/room1"+"^^xsd:anyURI");
+        //.addProperty(IoT_Lite.interfaceDescription, "");
+        //.addProperty(RDF.type, ""); // ver aqui
+
+
+
+
+
+
         /**
          * A sensor can do (implements) sensing: that is, a sensor is any entity
          * that can follow a sensing method and thus observe some Property of a
@@ -175,10 +255,11 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
          * methods, a laboratory setup with a person following a method, or any
          * other thing that can follow a Sensing Method to observe a Property.
          */
-        Resource sensorResource = modeloMedicaoSinalVital
-                .createResource(sensorIRI)
-                .addProperty(RDF.type, SSN.SensingDevice)
-                .addProperty(SSN.observes, propertyResource);
+		/*Resource sensorResource = modeloMedicaoSinalVital
+				.createResource(sensorIRI)
+					.addProperty(RDF.type, SSN.SensingDevice)
+					.addProperty(SSN.observes, propertyResource);
+		*/
 
         //allDiff.addDistinctMember(sensorResource);
 
@@ -188,14 +269,15 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
          */
 
         //Resource[] sensorOutputResource = new Resource[sensorOutput.length];
-        Resource sensorOutputResource;
+		/*Resource sensorOutputResource;
 
-        //for (int i = 0; i < values.length; i++) {
-        sensorOutputResource = modeloMedicaoSinalVital
-                .createResource(SSN.NS + sensorOutput + "-" + getID())
-                .addProperty(RDF.type, SSN.SensorOutput)
-                .addProperty(SSN.isProducedBy, sensorResource);
-        //}
+		//for (int i = 0; i < values.length; i++) {
+		sensorOutputResource = modeloMedicaoSinalVital
+				.createResource(SSN.NS + sensorOutput +"-"+ UUID.randomUUID().toString())
+					.addProperty(RDF.type, SSN.SensorOutput)
+					.addProperty(SSN.isProducedBy, sensorResource);
+		//}
+		 */
 
         /**
          * An Observation is a Situation in which a Sensing method has been used
@@ -206,95 +288,65 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
          * times etc.
          */
 
-        GregorianCalendar calendar = new GregorianCalendar();
-        calendar.setTime(new Date());
-        DatatypeFactory df;
-        Date dateTime = calendar.getTime();
-//        XMLGregorianCalendar dateTime = null;
-//        try {
-//            df = DatatypeFactory.newInstance();
-//            dateTime = df.newXMLGregorianCalendar(calendar);
-//        } catch (DatatypeConfigurationException e) {
-//            e.printStackTrace();
-//        }
+
+        // Daqui pra baixo tem que ver!!
 
 
         //for (int i = 0; i < values.length; i++) {
-        modeloMedicaoSinalVital.createResource(SSN.NS + observation + "-" + getID())
-                .addProperty(RDF.type, SSN.Observation)
-                .addProperty(SSN.observedBy, sensorResource)
-                .addProperty(SSN.observedProperty, propertyResource)
-                .addProperty(SSN.observationResult, sensorOutputResource)
-                .addProperty(SSN.featureOfInterest, featureOfInterestResource)
-                .addProperty(SSN.observationResultTime, modeloMedicaoSinalVital.createTypedLiteral(dateTime.toString(), XSDDatatype.XSDdateTime));
+        modeloMedicaoSinalVital.createResource(IoT_Lite.NS + entity +"-"+ UUID.randomUUID().toString())
+                .addProperty(RDF.type, IoT_Lite.Entity)
+                .addProperty(IoT_Lite.hasSensingDevice, sensingDeviceResource)
+                //.addProperty(IoT_Lite.has, attributeResource)
+                .addProperty(Geo.location, locationResource)
+                .addProperty(IoT_Lite.hasMetadata, serviceResource);
         //}
 
 
-        if (sinal == "Temp") {
-            sensorOutputResource.addProperty(SSN.hasValue,
-                    modeloMedicaoSinalVital.createResource(SSN.NS + observationValue + "-" + getID())
-                            .addProperty(RDF.type, SSN.ObservationValue)
-                            .addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDfloat))
-                            .addProperty(SSN.hasOutputUnit, M3.DegreeCelsius)
-            );
+		/*
+		if (sinal == "Temp") {
+			sensorOutputResource.addProperty(SSN.hasValue,
+				modeloMedicaoSinalVital.createResource(SSN.NS + observationValue +"-"+ UUID.randomUUID().toString())
+					.addProperty(RDF.type, SSN.ObservationValue)
+					.addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDfloat))
+					.addProperty(SSN.hasOutputUnit, modeloMedicaoSinalVital.createTypedLiteral(unidadeMedida, XSDDatatype.XSDstring))
+			);
+		} else if (sinal == "PresSang") {
 
-            sensorResource.addProperty(RDF.type, M3.BodyThermometer);
+			String uri = SSN.NS + observationValue +"-"+ UUID.randomUUID().toString();
+			for (int i = 0; i < values.length; i++) {
+				if (i == 0) {
+					sensorOutputResource.addProperty(SSN.hasValue,
+						modeloMedicaoSinalVital.createResource(uri)
+							.addProperty(RDF.type, SSN.ObservationValue)
+							.addProperty(SSN.hasOutputValueAux, modeloMedicaoSinalVital.createTypedLiteral(values[i], XSDDatatype.XSDnonNegativeInteger))
+							.addProperty(SSN.hasOutputUnit, modeloMedicaoSinalVital.createTypedLiteral(unidadeMedida, XSDDatatype.XSDstring))
+					);
 
+				}
+				else {
+					sensorOutputResource.addProperty(SSN.hasValue,
+						modeloMedicaoSinalVital.createResource(uri)
+							.addProperty(RDF.type, SSN.ObservationValue)
+							.addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[i], XSDDatatype.XSDnonNegativeInteger))
+							.addProperty(SSN.hasOutputUnit, modeloMedicaoSinalVital.createTypedLiteral(unidadeMedida, XSDDatatype.XSDstring))
+					);
+				}
 
-        } else if (sinal == "PresSang") {
-
-            String uri = SSN.NS + observationValue + "-" + getID();
-            for (int i = 0; i < values.length; i++) {
-                if (i == 0) {
-                    sensorOutputResource.addProperty(SSN.hasValue,
-                            modeloMedicaoSinalVital.createResource(uri)
-                                    .addProperty(RDF.type, SSN.ObservationValue)
-                                    .addProperty(SSN.hasOutputValueAux, modeloMedicaoSinalVital.createTypedLiteral(values[i], XSDDatatype.XSDnonNegativeInteger))
-                                    .addProperty(SSN.hasOutputUnit, M3.MmHg)
-                    );
-
-                } else {
-                    sensorOutputResource.addProperty(SSN.hasValue,
-                            modeloMedicaoSinalVital.createResource(uri)
-                                    .addProperty(RDF.type, SSN.ObservationValue)
-                                    .addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[i], XSDDatatype.XSDnonNegativeInteger))
-                                    .addProperty(SSN.hasOutputUnit,  M3.MmHg)
-                    );
-                }
-
-            }
-            sensorResource.addProperty(RDF.type, M3.BloodPressureSensor);
-        }else if (sinal == "FreqPulso") {
-            sensorOutputResource.addProperty(SSN.hasValue,
-                    modeloMedicaoSinalVital.createResource(SSN.NS + observationValue + "-" + getID())
-                            .addProperty(RDF.type, SSN.ObservationValue)
-                            .addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDfloat))
-                            .addProperty(SSN.hasOutputUnit, M3.BeatPerMinute));
-
-            sensorResource.addProperty(RDF.type, M3.HeartBeatSensor);
-        }else if (sinal == "SatOxig") {
-            sensorOutputResource.addProperty(SSN.hasValue,
-                    modeloMedicaoSinalVital.createResource(SSN.NS + observationValue + "-" + getID())
-                            .addProperty(RDF.type, SSN.ObservationValue)
-                            .addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDfloat))
-                            .addProperty(SSN.hasOutputUnit, M3.Percent)
-            );
-            sensorResource.addProperty(RDF.type, M3.PulseOxymeter);
-        }
-            else
-        {
+			}
+		} 	else {
 //				String aux = String.valueOf(values[i]);
 //				int aux2 = Integer.parseUnsignedInt(aux);
 
-            //int aux = Integer.parseInt((String) values[i]);
-            sensorOutputResource.addProperty(SSN.hasValue,
-                    modeloMedicaoSinalVital.createResource(SSN.NS + observationValue + "-" + getID())
-                            .addProperty(RDF.type, SSN.ObservationValue)
-                            .addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDnonNegativeInteger))
-                            .addProperty(SSN.hasOutputUnit, modeloMedicaoSinalVital.createTypedLiteral(unidadeMedida, XSDDatatype.XSDstring))
-            );
+			//int aux = Integer.parseInt((String) values[i]);
+			sensorOutputResource.addProperty(SSN.hasValue,
+				modeloMedicaoSinalVital.createResource(SSN.NS + observationValue +"-"+ UUID.randomUUID().toString())
+					.addProperty(RDF.type, SSN.ObservationValue)
+					.addProperty(SSN.hasOutputValue, modeloMedicaoSinalVital.createTypedLiteral(values[0], XSDDatatype.XSDnonNegativeInteger))
+					.addProperty(SSN.hasOutputUnit, modeloMedicaoSinalVital.createTypedLiteral(unidadeMedida, XSDDatatype.XSDstring))
+			);
 
-        }
+		}
+		*/
 
         return modeloMedicaoSinalVital;
     }
@@ -322,6 +374,7 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
 
 		//System.out.println("\n\n");
 
+
 		rs = new HWRepresentationServiceSensor(ontModel);
 
 
@@ -339,18 +392,14 @@ public class HWRepresentationServiceSensor extends HWRepresentationService {
         this.modeloMedicaoSinalVital = modeloMedicaoSinalVital;
     }
 
-    public OntModel getModeloMedicaoSinalVital(){
-        return this.modeloMedicaoSinalVital;
-    }
-
 
     public HWTransferObject getDataTransferObject(String idPaciente, String nomeClasseSinalVital, String complementoTopico, byte[] medidaByteArray, String valorMedidaColetada, String instanteMedidaColetada) {
 
         hermesWidgetTO = new HWTransferObject();
 
-        // ALTERACAO
+        // ALTERAÇÃO
         // hermesWidgetTO.setIdEntidade(idPaciente+"_"+nomeClasseSinalVital);
-        hermesWidgetTO.setIdEntidade("person" + idPaciente);
+        hermesWidgetTO.setIdEntidade("person"+idPaciente);
 
         hermesWidgetTO.setNomeTopico(nomeClasseSinalVital);
         hermesWidgetTO.setComplementoTopico(complementoTopico);

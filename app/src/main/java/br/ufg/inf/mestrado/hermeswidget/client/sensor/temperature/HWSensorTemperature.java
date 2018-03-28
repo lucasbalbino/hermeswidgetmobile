@@ -160,13 +160,13 @@ public class HWSensorTemperature extends HermesWidgetSensorClient {
                     // REMOVENDO O HERMES BASE
 //                    threadPoolMedidas.schedule(this.getNotificationService(hermesBaseManager, hermesWidgetTO), segundos, TimeUnit.SECONDS);
 
-                    threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos, TimeUnit.SECONDS);
+                    //threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos, TimeUnit.SECONDS);
 
                     // Limpa o modelo de representacao para a proxima instancia
 
                     // Guarda em cache as ultimas N representações em formato OntModel
-                    cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
-                    contadorCache = (contadorCache+1) % tamCache;
+                    //cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                    //contadorCache = (contadorCache+1) % tamCache;
 
                     representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
 
@@ -178,7 +178,7 @@ public class HWSensorTemperature extends HermesWidgetSensorClient {
                 contadorLinhas++;
             }
         }
-        MainActivity.setCache(cache);
+        //MainActivity.setCache(cache);
     }
 
     public Writer getRecordRDF() {

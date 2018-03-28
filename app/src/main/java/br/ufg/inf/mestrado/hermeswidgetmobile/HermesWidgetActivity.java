@@ -39,13 +39,13 @@ public class HermesWidgetActivity extends AppCompatActivity {
         String args[] = new String[3];
 
         // QUANTIDADE DE TUPLAS A SEREM PROCESSADAS
-        args[0] = "10";  // MAXIMO DE TUPLAS: 34540
+        args[0] = "100";  // MAXIMO DE TUPLAS: 34540
 
         // INTERVALO ENTRE AS TUPLAS
         args[1] = "1"; // DEFAULT = 1
 
         // QUANTIDADE DE REPRESENTAÇÕES OntModel EM CACHE
-        args[2] = "7";
+        args[2] = "1";
 
         String arquivo = "041n.csv";
 
@@ -111,6 +111,6 @@ public class HermesWidgetActivity extends AppCompatActivity {
         Log.e("HW", "HERMES WIDGET FINALIZADO!!!!");
         estimatedTime = (System.currentTimeMillis() - startTime)/1000.0;
         MainActivity.id = MainActivity.id +1;
-        return record;
+        return "";
     }
 }

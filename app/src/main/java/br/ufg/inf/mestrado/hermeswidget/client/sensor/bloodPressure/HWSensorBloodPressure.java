@@ -201,7 +201,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                     // REMOVENDO O HERMES BASE
 //                    threadPoolMedidas.schedule(this.getNotificationService(hermesBaseManager, hermesWidgetTO), segundos, TimeUnit.SECONDS);
 
-                    threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos, TimeUnit.SECONDS);
+                    //threadPoolMedidas.schedule(this.getNotificationService(hermesWidgetTO), segundos, TimeUnit.SECONDS);
 
                 }
 
@@ -211,8 +211,8 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
                 //
 
                 // Guarda em cache as ultimas N representações em formato OntModel
-                cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
-                contadorCache = (contadorCache+1) % tamCache;
+                //cache[contadorCache] = representationService.getModeloMedicaoSinalVital();
+                //contadorCache = (contadorCache+1) % tamCache;
 
                 representationService.modeloMedicaoSinalVital.write(this.recordRDF, "TURTLE");
 
@@ -222,7 +222,7 @@ public class HWSensorBloodPressure extends HermesWidgetSensorClient {
             }
             contadorLinhas++;
         }
-        MainActivity.setCache(cache);
+        //MainActivity.setCache(cache);
     }
 
     public Writer getRecordRDF() {
